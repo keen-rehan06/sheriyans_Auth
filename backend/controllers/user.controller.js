@@ -67,11 +67,14 @@ export const loginUser = async (req, res) => {
 
     const accessToken = generateAccessToken(user);
     user.isLoggedIn = true;
+    user.token = null;
     user.refreshToken = refreshToken;
     await user.save();
+    res.clearCookie("token");
     return res
       .status(200)
       .cookie("refreshToken", refreshToken)
+      .cookie("accessToken", accessToken)
       .send({
         message: `Welcome Back ${user.name}!`,
         success: true,
@@ -80,7 +83,7 @@ export const loginUser = async (req, res) => {
       });
   } catch (error) {
     console.log(error.message)
-    res.status(500).send({ message: "Server error:", error });
+    res.status(500).send({ message: "Login Failed", error });
   }
 };
 
@@ -130,23 +133,18 @@ export const refreshToken = async (req, res) => {
   }
 };
 
-export const logOutUser = async (req,res) =>{
-   try {
-    const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken) return res.status(404).send({message:"Refresh Token Not Found!",success:false})
-    const refreshTokenHash = await bcrypt.hash(refreshToken,10);
-    const session = await sessionModel.findOne({
-      refreshToken,
-      revoked:false
-    });
-    if(!session) return res.status(401).send({message:"Invalid refresh token!"});
-    session.revoked = true;
-    await session.save();
-    res.clearCookie("refreshToken");
-    return res.status(200).send({message:"User Logout SuccessFully!",})
-   } catch (error) {
+export const logOutUser = async (req, res) => {
+  try{
     
-   }
-}
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).send({
+      message: "Failed to Logout!",
+      success: false,
+      error: error.message,
+    });
+  }
+};
 
 

@@ -1,4 +1,5 @@
 import userModel from "../models/user.model.js";
+import jwt from "jsonwebtoken"
 
 export const checkUserRegister = async (req, res, next) => {
   try {
@@ -45,22 +46,15 @@ export const isUserLoggedIn = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader?.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
-    } else if (req.cookies?.token) {
-      token = req.cookies.token;
+    } else if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken;
     } else {
       return res.status(401).json({
         message: "Login required",
       });
     }
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_PASS);
-    req.user = decoded;
-    const user = await userModel.findById(decoded.userid);
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-    res.status(200).send({ message: `User ${user.name} Found`, data: user });
+    req.user = decoded;    
     next();
   } catch (error) {
     console.log(error.message);

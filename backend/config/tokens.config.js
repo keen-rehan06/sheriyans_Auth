@@ -21,7 +21,7 @@ export const generateAccessToken = (user) => {
         if(!user) {
             throw new Error("User Not Found!")
         }
-        return jwt.sign({userid:user._id},process.env.ACCESS_TOKEN_PASS,{expiresIn:'30s'});
+        return jwt.sign({userid:user._id},process.env.ACCESS_TOKEN_PASS,{expiresIn:'1d'});
     } catch (error) {
         res.status(401).send({message:"AccessToken Generation Failed!",error})
     }
